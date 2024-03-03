@@ -1,14 +1,8 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/sign-up.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
-import { Roles } from './decorators/roles.decorator';
 import { Role } from './enums/roles.enum';
 
 @Injectable()
