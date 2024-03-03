@@ -11,7 +11,8 @@ import { AuthGuard } from './guards/auth.guard';
 import { Roles } from './decorators/roles.decorator';
 import { Role } from './enums/roles.enum';
 import { RolesGuard } from './guards/roles.guard';
-import { SignInDto } from './dtos/SignInDto';
+import { SignInDto } from './dto/sign-in.dto';
+import { SignUpDto } from './dto/sign-up.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -23,7 +24,9 @@ export class AuthController {
   }
 
   @Post('signup')
-  signUp() {}
+  signUp(@Body() signUpDto: SignUpDto) {
+    return this.authService.signUp(signUpDto);
+  }
 
   @Post('logout')
   logout() {}
