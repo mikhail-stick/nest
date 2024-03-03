@@ -6,7 +6,11 @@ import { UserRepository } from './user.repository';
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  findAll(): Promise<User[]> {
+  async findAll(): Promise<User[]> {
     return this.userRepository.find();
+  }
+
+  async findOneByUsername(username: string): Promise<User | undefined> {
+    return this.userRepository.findOneByUsername(username);
   }
 }
