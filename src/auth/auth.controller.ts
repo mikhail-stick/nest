@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
-  HttpStatus,
   Post,
   Request,
   UseGuards,
@@ -13,21 +11,21 @@ import { AuthGuard } from './guards/auth.guard';
 import { Roles } from './decorators/roles.decorator';
 import { Role } from './enums/roles.enum';
 import { RolesGuard } from './guards/roles.guard';
+import { SignInDto } from './dtos/SignInDto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: Record<string, any>) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  signIn(@Body() signInDto: SignInDto) {
+    return this.authService.signIn(signInDto.email, signInDto.password);
   }
 
   @Post('signup')
   signUp() {}
 
-  @Post()
+  @Post('logout')
   logout() {}
 
   @UseGuards(AuthGuard)

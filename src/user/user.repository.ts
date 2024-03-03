@@ -8,7 +8,7 @@ export class UserRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
 
-  async findOneByUsername(username: string): Promise<User | null> {
-    return super.findOneBy({ username: username });
+  async findOneByEmail(email: string): Promise<User | null> {
+    return super.findOneBy({ email: email });
   }
 }
