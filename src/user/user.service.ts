@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
 import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -22,7 +23,13 @@ export class UserService {
     if (isExist) {
       throw new HttpException('User already exist.', HttpStatus.BAD_REQUEST);
     }
-    const user = this.userRepository.create({ ...createUserDto });
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(createUserDto.password, salt);
+    const user = this.userRepository.create({
+      email: createUserDto.email,
+      password: hash,
+      roles: createUserDto.roles,
+    });
     return await this.userRepository.save(user);
   }
 }
