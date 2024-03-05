@@ -1,17 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
-
-interface DatabaseConfig {
-  POSTGRES_HOST: string;
-  POSTGRES_PORT: number;
-  POSTGRES_USER: string;
-  POSTGRES_PASSWORD: string;
-}
+import { DatabaseConfig } from './config.types';
 
 @Module({
   imports: [
@@ -23,16 +15,15 @@ interface DatabaseConfig {
         port: configService.getOrThrow('POSTGRES_PORT', { infer: true }),
         username: configService.getOrThrow('POSTGRES_USER'),
         password: configService.getOrThrow('POSTGRES_PASSWORD'),
-        // entities: [User],
         autoLoadEntities: true,
         synchronize: true,
+        retryAttempts: 10,
+        retryDelay: 1000,
       }),
       inject: [ConfigService],
     }),
     UserModule,
     AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

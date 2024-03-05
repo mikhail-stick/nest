@@ -2,9 +2,11 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/sign-up.dto';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { Role } from './enums/roles.enum';
+import { UserRole } from '../user/user-role.enum';
 import * as bcrypt from 'bcrypt';
+import { HASH_SALT } from './auth.constants';
+import { ServiceError } from '../exceptions/service.error';
+import { PrincipalType } from './types/principal.type';
 
 @Injectable()
 export class AuthService {
@@ -16,28 +18,41 @@ export class AuthService {
   async signIn(
     email: string,
     password: string,
-  ): Promise<{ access_token: string }> {
+  ): Promise<{ accessToken: string }> {
     const user = await this.userService.findOneByEmail(email);
-    const isMatch = bcrypt.compare(user?.password, password);
-    if (!isMatch) {
-      throw new UnauthorizedException();
-    }
-    const payload = {
+
+    this.assertPasswordMatch(user?.password, password);
+
+    const payload: PrincipalType = {
       sub: user.id,
       email: user.email,
-      roles: user.roles,
+      role: user.role,
     };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      accessToken: await this.jwtService.signAsync(payload),
     };
   }
 
+  assertPasswordMatch(hashedPassword: string | Buffer, password: string) {
+    const isMatch = bcrypt.compare(hashedPassword, password);
+    if (!isMatch) {
+      throw new UnauthorizedException();
+    }
+  }
+
   async signUp(signUpDto: SignUpDto) {
-    const createUserDto: CreateUserDto = {
+    const isExist = await this.userService.findOneByEmail(signUpDto.email);
+
+    if (isExist) {
+      throw new ServiceError('User already exist');
+    }
+
+    const hash = await bcrypt.hash(signUpDto.password, HASH_SALT);
+
+    return await this.userService.createUser({
       email: signUpDto.email,
-      password: signUpDto.password,
-      roles: Role.User,
-    };
-    return await this.userService.createUser(createUserDto);
+      password: hash,
+      role: UserRole.User,
+    });
   }
 }

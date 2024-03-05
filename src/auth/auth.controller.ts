@@ -8,11 +8,11 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from './guards/auth.guard';
-import { Roles } from './decorators/roles.decorator';
-import { Role } from './enums/roles.enum';
-import { RolesGuard } from './guards/roles.guard';
+import { UserRole } from '../user/user-role.enum';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { Auth } from './decorators/auth.decorator';
+import { Principal } from './decorators/principal.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -33,12 +33,11 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
+  getProfile(@Principal() user) {
+    return user;
   }
 
-  @Roles(Role.Admin)
-  @UseGuards(AuthGuard, RolesGuard)
+  @Auth(UserRole.Admin)
   @Get('admin')
   getSmth() {
     return 'Admin';
