@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignUpDto } from './dto/sign-up.dto';
@@ -39,7 +39,7 @@ export class AuthService {
   assertPasswordMatch(hashedPassword: string | Buffer, password: string) {
     const isMatch = bcrypt.compare(hashedPassword, password);
     if (!isMatch) {
-      throw new UnauthorizedException();
+      throw new ServiceError('Incorrect password');
     }
   }
 
