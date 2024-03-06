@@ -8,6 +8,7 @@ import {
 import { Response } from 'express';
 import { AppError } from './app.error';
 import { ServiceError } from './service.error';
+import { ValidationError } from './validation.error';
 
 @Catch()
 export class ExceptionsFilter implements ExceptionFilter {
@@ -35,9 +36,13 @@ export class ExceptionsFilter implements ExceptionFilter {
   }
 
   getAppErrorCode(exception: AppError) {
-    if (exception instanceof ServiceError) {
+    if (
+      exception instanceof ServiceError ||
+      exception instanceof ValidationError
+    ) {
       return HttpStatus.BAD_REQUEST;
     }
+
     throw new Error('Unhandled error.');
   }
 }

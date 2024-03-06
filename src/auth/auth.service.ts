@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { HASH_SALT } from './auth.constants';
 import { ServiceError } from '../exceptions/service.error';
 import { PrincipalType } from './types/principal.type';
+import { normalizeEmail } from 'validator';
 
 @Injectable()
 export class AuthService {
@@ -19,9 +20,11 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<{ accessToken: string }> {
-    const user = await this.userService.findOneByEmail(email);
+    const normalizedEmail = this.assertEmail(email);
 
-    this.assertPasswordMatch(user?.password, password);
+    const user = await this.userService.findOneByEmailOrFail(normalizedEmail);
+
+    this.assertPasswordMatch(user.password, password);
 
     const payload: PrincipalType = {
       sub: user.id,
@@ -41,18 +44,34 @@ export class AuthService {
   }
 
   async signUp(signUpDto: SignUpDto) {
-    const isExist = await this.userService.findOneByEmail(signUpDto.email);
+    const normalizedEmail = this.assertEmail(signUpDto.email);
 
-    if (isExist) {
-      throw new ServiceError('User already exist');
-    }
+    await this.assertUserNotExist(normalizedEmail);
 
     const hash = await bcrypt.hash(signUpDto.password, HASH_SALT);
 
     return await this.userService.createUser({
-      email: signUpDto.email,
+      email: normalizedEmail,
       password: hash,
       role: UserRole.User,
     });
+  }
+
+  assertEmail(email: string) {
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail) {
+      throw new ServiceError('Incorrect email');
+    }
+
+    return normalizedEmail;
+  }
+
+  async assertUserNotExist(email: string) {
+    const isExist = await this.userService.findOneByEmail(email);
+
+    if (isExist) {
+      throw new ServiceError('User already exist');
+    }
   }
 }

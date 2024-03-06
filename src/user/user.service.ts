@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
+import { ServiceError } from '../exceptions/service.error';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,7 @@ export class UserService {
     const user = await this.userRepository.findOneBy({ email });
 
     if (!user) {
-      throw new Error('User was not found');
+      throw new ServiceError('User was not found');
     }
 
     return user;
