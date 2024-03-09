@@ -8,6 +8,8 @@ import { HASH_SALT } from './auth.constants';
 import { ServiceError } from '../exceptions/service.error';
 import { PrincipalType } from './types/principal.type';
 import { normalizeEmail } from 'validator';
+import { AuthError } from '../exceptions/enums/auth-error.enum';
+import { SignInDto } from './dto/sign-in.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,21 +18,19 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(
-    email: string,
-    password: string,
-  ): Promise<{ accessToken: string }> {
-    const normalizedEmail = this.assertEmail(email);
+  async signIn(signInDto: SignInDto): Promise<{ accessToken: string }> {
+    const normalizedEmail = this.normalizeEmailOrFail(signInDto.email);
 
     const user = await this.userService.findOneByEmailOrFail(normalizedEmail);
 
-    this.assertPasswordMatch(user.password, password);
+    this.assertPasswordMatch(user.password, signInDto.password);
 
     const payload: PrincipalType = {
       sub: user.id,
       email: user.email,
-      role: user.role,
+      role: UserRole[user.role],
     };
+
     return {
       accessToken: await this.jwtService.signAsync(payload),
     };
@@ -39,29 +39,29 @@ export class AuthService {
   assertPasswordMatch(hashedPassword: string | Buffer, password: string) {
     const isMatch = bcrypt.compare(hashedPassword, password);
     if (!isMatch) {
-      throw new ServiceError('Incorrect password');
+      throw new ServiceError(AuthError.INCORRECT_PASSWORD);
     }
   }
 
   async signUp(signUpDto: SignUpDto) {
-    const normalizedEmail = this.assertEmail(signUpDto.email);
+    const normalizedEmail = this.normalizeEmailOrFail(signUpDto.email);
 
     await this.assertUserNotExist(normalizedEmail);
 
     const hash = await bcrypt.hash(signUpDto.password, HASH_SALT);
 
-    return await this.userService.createUser({
+    return this.userService.createUser({
       email: normalizedEmail,
       password: hash,
       role: UserRole.User,
     });
   }
 
-  assertEmail(email: string) {
+  normalizeEmailOrFail(email: string) {
     const normalizedEmail = normalizeEmail(email);
 
     if (!normalizedEmail) {
-      throw new ServiceError('Incorrect email');
+      throw new ServiceError(AuthError.INCORRECT_EMAIL);
     }
 
     return normalizedEmail;
@@ -71,7 +71,7 @@ export class AuthService {
     const isExist = await this.userService.findOneByEmail(email);
 
     if (isExist) {
-      throw new ServiceError('User already exist');
+      throw new ServiceError(AuthError.USER_ALREADY_EXIST);
     }
   }
 }

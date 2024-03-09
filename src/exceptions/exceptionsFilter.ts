@@ -36,13 +36,12 @@ export class ExceptionsFilter implements ExceptionFilter {
   }
 
   getAppErrorCode(exception: AppError) {
-    if (
-      exception instanceof ServiceError ||
-      exception instanceof ValidationError
-    ) {
+    if (exception instanceof ServiceError) {
       return HttpStatus.BAD_REQUEST;
     }
-
+    if (exception instanceof ValidationError) {
+      return HttpStatus.UNPROCESSABLE_ENTITY;
+    }
     throw new Error('Unhandled error.');
   }
 }

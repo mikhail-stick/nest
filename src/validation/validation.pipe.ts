@@ -6,7 +6,11 @@ import { ValidationError as AppValidationError } from '../exceptions/validation.
 @Injectable()
 export class ValidationPipe implements PipeTransform {
   async transform(value: any, metadata: ArgumentMetadata) {
-    const object = plainToInstance(metadata.metatype, value);
+    const { metatype } = metadata;
+    if (!metatype) {
+      return value;
+    }
+    const object = plainToInstance(metatype, value);
     const errors = await validate(object);
     if (errors.length > 0) {
       throw new AppValidationError(this.expandError(errors));
@@ -15,10 +19,12 @@ export class ValidationPipe implements PipeTransform {
   }
   public expandError(errors: ValidationError[]) {
     let message = '';
-    const mistakes = errors[0].constraints;
-    Object.keys(mistakes).forEach((key) => {
-      message += mistakes[key];
-    });
+    const constraints = errors[0].constraints;
+    if (constraints) {
+      Object.keys(constraints).forEach((key) => {
+        message += constraints[key];
+      });
+    }
     return message;
   }
 }

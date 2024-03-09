@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
 import { ServiceError } from '../exceptions/service.error';
+import { UserError } from '../exceptions/enums/user-error.enum';
 
 @Injectable()
 export class UserService {
@@ -19,13 +20,13 @@ export class UserService {
     const user = await this.userRepository.findOneBy({ email });
 
     if (!user) {
-      throw new ServiceError('User was not found');
+      throw new ServiceError(UserError.USER_NOT_FOUND);
     }
 
     return user;
   }
 
   async createUser(createUserProps: Pick<User, 'email' | 'password' | 'role'>) {
-    return await this.userRepository.save(createUserProps);
+    return this.userRepository.save(createUserProps);
   }
 }
