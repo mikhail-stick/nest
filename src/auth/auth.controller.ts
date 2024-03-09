@@ -14,12 +14,14 @@ export class AuthController {
 
   @Post('login')
   async signIn(@Body() signInDto: SignInDto) {
-    return new SignInResponseDto(await this.authService.signIn(signInDto));
+    const signInResponse = await this.authService.signIn(signInDto);
+    return new SignInResponseDto(signInResponse);
   }
 
   @Post('signup')
   async signUp(@Body() signUpDto: SignUpDto) {
-    return new SignUpResponseDto(await this.authService.signUp(signUpDto));
+    const signUpResponse = await this.authService.signUp(signUpDto);
+    return new SignUpResponseDto(signUpResponse);
   }
 
   @Post('logout')
