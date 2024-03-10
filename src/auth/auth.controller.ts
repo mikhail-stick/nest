@@ -1,13 +1,18 @@
 import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserRole } from '../user/user-role.enum';
-import { SignInDto } from './dto/sign-in.dto';
+import { SignInBodyDto } from './dto/sign-in-body.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { Auth } from './decorators/auth.decorator';
 import { Principal } from './decorators/principal.decorator';
 import { SignInResponseDto } from './dto/sign-in-response.dto';
 import { SignUpResponseDto } from './dto/sign-up-response.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -16,7 +21,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Sign in' })
   @Post('login')
-  async signIn(@Body() signInDto: SignInDto) {
+  async signIn(@Body() signInDto: SignInBodyDto) {
     const signInResponse = await this.authService.signIn(signInDto);
     return new SignInResponseDto(signInResponse);
   }
@@ -32,12 +37,14 @@ export class AuthController {
   @Post('logout')
   logout() {}
 
+  @ApiBearerAuth()
   @Auth()
   @Get('profile')
   getProfile(@Principal() user) {
     return user;
   }
 
+  @ApiBearerAuth()
   @Auth([UserRole.Admin])
   @Get('admin')
   getSmth() {

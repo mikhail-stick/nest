@@ -9,7 +9,7 @@ import { ServiceError } from '../exceptions/service.error';
 import { PrincipalType } from './types/principal.type';
 import { normalizeEmail } from 'validator';
 import { AuthError } from '../exceptions/enums/auth-error.enum';
-import { SignInDto } from './dto/sign-in.dto';
+import { SignInBodyDto } from './dto/sign-in-body.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(signInDto: SignInDto): Promise<{ accessToken: string }> {
+  async signIn(signInDto: SignInBodyDto): Promise<{ accessToken: string }> {
     const normalizedEmail = this.normalizeEmailOrFail(signInDto.email);
 
     const user = await this.userService.findOneByEmailOrFail(normalizedEmail);

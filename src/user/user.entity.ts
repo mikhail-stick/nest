@@ -12,6 +12,6 @@ export class User {
   @Column()
   email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'enum', enum: UserRole })
   role: UserRole;
 }
