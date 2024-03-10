@@ -2,15 +2,15 @@ version: '3.7'
 services:
   db:
     container_name: postgres
-    image: postgres:16
+    image: postgres:16.1
     restart: always
     env_file:
       - .env.development
     environment:
-      PG_DATA: /var/lib/postgresql@16/data
+      PG_DATA: /var/lib/postgresql@16.1/data
     ports:
       - '5432:5432'
     volumes:
-      - db:/var/lib/postgresql@16/data
+      - db:/var/lib/postgresql@16.1/data
 volumes:
   db:
