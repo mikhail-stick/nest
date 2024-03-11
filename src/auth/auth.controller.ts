@@ -37,14 +37,12 @@ export class AuthController {
   @Post('logout')
   logout() {}
 
-  @ApiBearerAuth()
   @Auth()
   @Get('profile')
   getProfile(@Principal() user) {
     return user;
   }
 
-  @ApiBearerAuth()
   @Auth([UserRole.Admin])
   @Get('admin')
   getSmth() {
